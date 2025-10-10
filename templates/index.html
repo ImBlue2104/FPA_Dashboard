@@ -1,79 +1,65 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>FP&A Dashboard</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
     <h1>FP&A Dashboard</h1>
 
-    <!-- Global Budget Form -->
-    <h2>Set Global Budget</h2>
-    <form method="POST">
-        <input type="number" name="global_budget" placeholder="Enter total budget" step="0.01" required>
-        <button type="submit" name="set_global_budget">Set Budget</button>
-    </form>
+    <div class="container">
 
-    <p><strong>Total Global Budget:</strong> {{ global_budget }}</p>
-    <p><strong>Remaining Global Budget:</strong> {{ remaining_global }}</p>
+        <!-- Set Budget -->
+        <h2>Set Budget</h2>
+        <form method="POST">
+            <input type="number" name="budget" placeholder="Enter monthly budget" step="0.01" required>
+            <button type="submit" name="set_budget">Set Budget</button>
+        </form>
 
-    <!-- Monthly Budget Form -->
-    <h2>Set Monthly Budget</h2>
-    <form method="POST">
-        <input type="month" name="budget_month" required>
-        <input type="number" name="budget" placeholder="Enter budget" step="0.01" required>
-        <button type="submit" name="set_monthly_budget">Set Budget</button>
-    </form>
+        <!-- Add Expense -->
+        <h2>Add Expense</h2>
+        <form method="POST">
+            <input type="text" name="expense_name" placeholder="Expense name" required>
+            <input type="number" name="expense_amount" placeholder="Amount" step="0.01" required>
+            
+            <!-- Category dropdown -->
+            <select name="expense_category" required>
+                <option value="" disabled selected>Select category</option>
+                <option value="Groceries">Groceries</option>
+                <option value="Transport">Transport</option>
+                <option value="Entertainment">Entertainment</option>
+                <option value="Utilities">Utilities</option>
+                <option value="Dining">Dining</option>
+                <option value="Other">Other</option>
+            </select>
+            <button type="submit" name="add_expense">Add Expense</button>
+        </form>
 
-    <!-- Add Expense Form -->
-    <h2>Add Expense</h2>
-    <form method="POST">
-        <input type="text" name="expense_name" placeholder="Expense name" required>
-        <input type="number" name="expense_amount" placeholder="Amount" step="0.01" required>
+        <!-- Monthly Summary -->
+        <h2>Summary</h2>
+        <div class="summary">
+            <div class="summary-item">Budget: {{ budget }}</div>
+            <div class="summary-item">Total Spent: {{ total_spent }}</div>
+            <div class="summary-item">Remaining: {{ remaining }}</div>
+        </div>
 
-        <!-- Category dropdown -->
-        <select name="expense_category" required>
-            <option value="" disabled selected>Select category</option>
-            <option value="Groceries">Groceries</option>
-            <option value="Transport">Transport</option>
-            <option value="Entertainment">Entertainment</option>
-            <option value="Utilities">Utilities</option>
-            <option value="Dining">Dining</option>
-            <option value="Other">Other</option>
-        </select>
+        <!-- Expenses List -->
+        <h2>Expenses</h2>
+        <ul>
+            {% for e in expenses %}
+            <li>
+                <span><strong>Name:</strong> {{ e.name }}</span>
+                <span><strong>Amount:</strong> {{ e.amount }}</span>
+                <span><strong>Category:</strong> {{ e.category }}</span>
+            </li>
+            {% endfor %}
+        </ul>
 
-        <!-- Date picker -->
-        <input type="date" name="expense_date">
+    </div>
 
-        <button type="submit" name="add_expense">Add Expense</button>
-    </form>
-
-    <!-- Monthly Summary Table -->
-    <h2>Monthly Summary</h2>
-    <table border="1" cellpadding="5" cellspacing="0">
-        <tr>
-            <th>Month</th>
-            <th>Budget</th>
-            <th>Spent</th>
-            <th>Remaining</th>
-        </tr>
-        {% for i in range(months|length) %}
-        <tr>
-            <td>{{ months[i] }}</td>
-            <td>{{ month_budgets[i] }}</td>
-            <td>{{ month_values[i] }}</td>
-            <td>{{ month_remaining[i] }}</td>
-        </tr>
-        {% endfor %}
-    </table>
-
-    <!-- List of Expenses -->
-    <h2>All Expenses</h2>
-    <ul>
-        {% for e in expenses %}
-        <li>{{ e['name'] }} - {{ e['amount'] }} - {{ e['category'] }} - {{ e['date'].strftime('%Y-%m-%d') }}</li>
-        {% endfor %}
-    </ul>
+    <footer>
+        &copy; 2025 FP&A Dashboard
+    </footer>
 </body>
 </html>
-
