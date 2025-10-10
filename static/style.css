@@ -1,10 +1,14 @@
 /* ===== General Page Styling ===== */
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f4f6f8;
+    font-family: "Poppins", sans-serif;
+    background: linear-gradient(135deg, #89b2fe, #005ad7);
     color: #333;
     margin: 0;
     padding: 0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
 }
 
 /* ===== Header ===== */
@@ -12,25 +16,57 @@ h1 {
     text-align: center;
     color: #1a73e8;
     margin-top: 30px;
-    margin-bottom: 20px;
+    font-size: 2.5rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
 }
 
 /* ===== Container ===== */
 .container {
+    width: 90%;
     max-width: 900px;
-    margin: 0 auto; /* centers it */
-    background: #fff;
-    padding: 30px;
-    border-radius: 12px;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(15px);
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0, 0.1);
+    padding: 40px 50px;
+    margin-top: 40px;
+    animation: fadeIn 1s ease;    
+}
+
+/* ===== Section Headings ===== */
+h2 {
+    text-align: center;
+    color: #0d47a1;
+    font-size: 1.5rem;
+    margin: 25px auto 10px auto;
+    margin-bottom: 15px;
+    border-bottom: 3px solid #1a73e8;
+    display: inline-block;
+    padding-bottom: 5px;
+}
+
+h2::after {
+    content:'';
+    width: 60px;
+    height:3px;
+    background-color: #1a73e8;
+    display: black;
+    margin: 8px auto 0;
+    border-radius: 3px;
 }
 
 /* ===== Forms ===== */
 form {
+    background: #f8faff;
+    padding: 20px;
+    border-radius:12px;
+    border: 1px solid #e0e6ef;
+    margin-bottom: 30px;
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    margin-bottom: 30px;
+    gap: 12px;
 }
 
 input, select, button {
@@ -39,33 +75,57 @@ input, select, button {
     border: 1px solid #ccc;
     border-radius: 8px;
     outline: none;
+    transition: all 0.3s ease;
 }
 
 input:focus, select:focus {
     border-color: #1a73e8;
-    box-shadow: 0 0 5px rgba(26, 115, 232, 0.2);
+    box-shadow: 0 0 10px rgba(26, 115, 232, 0.25);
 }
 
 button {
     background-color: #1a73e8;
     color: white;
+    border: none;
     cursor: pointer;
     font-weight: bold;
-    transition: background 0.3s;
+    box-shadow: 0 0 0px rgba(26, 115, 232, 0.3);
+    transition: all 0.3s ease;
 }
 
 button:hover {
-    background-color: #0f5bd8;
+    background: linear-gradient(90deg, #0f5bd8, #afc3ff);
+    transform: translateY(-2px);
 }
 
-/* ===== Section Headings ===== */
-h2 {
-    margin-top: 40px;
-    color: #222;
-    border-bottom: 2px solid #1a73e8;
-    display: inline-block;
-    padding-bottom: 5px;
-    align-content: center;
+/* ===== Summary ===== */
+.summary {
+    text-align: center;
+    background: rgba(230, 245, 235, 0.8);
+    border-radius: 12px;
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-top: 15px;
+    padding: 15px
+}
+
+.summary p {
+    margin: 5px 0;
+    font-weight: 500;
+}
+
+.summary-item {
+    flex: 1;
+    min-width: 250px;
+    background-color: #e9f3ff;
+    color: #1a73e8;
+    border-radius: 12px;
+    padding: 15px 25px;
+    text-align: center;
+    font-size: 1.1rem;
+    font-weight: 600;
 }
 
 /* ===== Table ===== */
@@ -73,17 +133,20 @@ table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 15px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 10px;
+    overflow: hidden;
 }
 
 th, td {
     padding: 10px;
-    border: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
     text-align: center;
 }
 
 th {
-    background-color: #e9f1ff;
-    color: #1a73e8;
+    background-color: #e3f2fd;
+    color: #0d47a1;
 }
 
 tr:nth-child(even) {
@@ -94,6 +157,7 @@ tr:nth-child(even) {
 ul {
     list-style-type: none;
     padding: 0;
+    margin-top: 10px;
 }
 
 li {
@@ -102,4 +166,33 @@ li {
     border-radius: 8px;
     padding: 10px;
     margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background 0.3;
 }
+
+li:hover {
+    background: #eef4ff;
+}
+
+/* ===== Footer ===== */
+footer {
+    text-align: center;
+    color: #777;
+    margin-top: 40px;
+    padding-bottom: 20px;
+    font-size: 0.9rem;
+}
+
+/* ===== Animations ===== */
+@keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(15px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
