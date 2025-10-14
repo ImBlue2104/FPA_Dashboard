@@ -1,75 +1,50 @@
-from flask import Flask, render_template, request
-from datetime import datetime
-from collections import defaultdict
+from flask import Flask, render_template, request, redirect, url_for
+import datetime
 
 app = Flask(__name__)
 
-# Store budgets and expenses
-global_budget = 0
-monthly_budget = defaultdict(float)
-expenses = []
+# Store budget and expenses in memory
+budget = 0
+expenses = []  # each expense will be a dict like {'name':..., 'amount':..., 'category':..., 'month':...}
 
-@app.route('/', methods=['GET', 'POST'])
-def home():
-    global global_budget, monthly_budget, expenses
+@app.route("/", methods=["GET", "POST"])
+def index():
+    global budget, expenses
 
-    if request.method == 'POST':
-        # --- Set global budget ---
-        if 'set_global_budget' in request.form:
-            global_budget = float(request.form['global_budget'])
+    # Handle form submissions
+    if request.method == "POST":
+        # If the user submitted the "Set Budget" form
+        if "set_budget" in request.form:
+            budget = float(request.form["budget"])
 
-        # --- Set monthly budget ---
-        elif 'set_monthly_budget' in request.form:
-            month = request.form['budget_month']  # e.g. "2025-10"
-            budget = float(request.form['budget'])
-            monthly_budget[month] = budget
+        # If the user submitted the "Add Expense" form
+        elif "add_expense" in request.form:
+            name = request.form["expense_name"]
+            amount = float(request.form["expense_amount"])
+            category = request.form["expense_category"]
+            month = datetime.date.today().strftime("%B %Y")  # e.g. "October 2025"
 
-        # --- Add expense ---
-        elif 'add_expense' in request.form:
-            name = request.form['expense_name']
-            amount = float(request.form['expense_amount'])
-            category = request.form['expense_category']
-
-            # Parse date or use today's date
-            date_str = request.form.get('expense_date')
-            if date_str:
-                date = datetime.strptime(date_str, "%Y-%m-%d")
-            else:
-                date = datetime.today()
-
+            # Add expense to list
             expenses.append({
-                'name': name,
-                'amount': amount,
-                'category': category,
-                'date': date
+                "name": name,
+                "amount": amount,
+                "category": category,
+                "month": month
             })
 
-    # --- Calculate totals ---
-    total_spent = sum(e['amount'] for e in expenses)
-    remaining_global = global_budget - total_spent
+    # Calculate summary info
+    total_spent = sum(e["amount"] for e in expenses)
+    remaining = budget - total_spent
 
-    # --- Monthly totals ---
-    monthly_totals = defaultdict(float)
-    for e in expenses:
-        month_key = e['date'].strftime("%Y-%m")
-        monthly_totals[month_key] += e['amount']
-
-    # Collect all months seen in expenses or budgets
-    months = sorted(set(list(monthly_budget.keys()) + list(monthly_totals.keys())))
-    month_values = [monthly_totals[m] for m in months]
-    month_budgets = [monthly_budget.get(m, 0) for m in months]
-    month_remaining = [month_budgets[i] - month_values[i] for i in range(len(months))]
-
+    # Pass values to HTML template
     return render_template(
         "index.html",
-        global_budget=global_budget,
-        remaining_global=remaining_global,
+        budget=budget,
         expenses=expenses,
-        months=months,
-        month_values=month_values,
-        month_budgets=month_budgets,
-        month_remaining=month_remaining
+        total_spent=total_spent,
+        remaining=remaining
     )
 
-if __name__ == '__main__':
-    app.run(debug=True)
+# Run app
+if __name__ == "__main__":
+    app.run(debug=True, use_reloader=False)
