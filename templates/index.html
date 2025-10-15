@@ -2,19 +2,40 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>FP&A Dashboard</title>
+    <title>FP&A Dashboard — {{ month }}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <h1>FP&A Dashboard</h1>
+    <h1>FP&A Dashboard — {{ month }}</h1>
 
     <div class="container">
+
+        <!-- Month Selection -->
+        <form method="POST" class="month-form">
+            <label for="month">Select Month:</label>
+            <select name="month" id="month">
+                <option value="January" {% if month=="January" %}selected{% endif %}>January</option>
+                <option value="February" {% if month=="February" %}selected{% endif %}>February</option>
+                <option value="March" {% if month=="March" %}selected{% endif %}>March</option>
+                <option value="April" {% if month=="April" %}selected{% endif %}>April</option>
+                <option value="May" {% if month=="May" %}selected{% endif %}>May</option>
+                <option value="June" {% if month=="June" %}selected{% endif %}>June</option>
+                <option value="July" {% if month=="July" %}selected{% endif %}>July</option>
+                <option value="August" {% if month=="August" %}selected{% endif %}>August</option>
+                <option value="September" {% if month=="September" %}selected{% endif %}>September</option>
+                <option value="October" {% if month=="October" %}selected{% endif %}>October</option>
+                <option value="November" {% if month=="November" %}selected{% endif %}>November</option>
+                <option value="December" {% if month=="December" %}selected{% endif %}>December</option>
+            </select>
+            <button type="submit" name="set_month">Set Month</button>
+        </form>
 
         <!-- Set Budget -->
         <h2>Set Budget</h2>
         <form method="POST">
             <input type="number" name="budget" placeholder="Enter monthly budget" step="0.01" required>
             <button type="submit" name="set_budget">Set Budget</button>
+            <button type="submit" name="delete_budget">Delete Budget</button>
         </form>
 
         <!-- Add Expense -->
@@ -34,6 +55,7 @@
                 <option value="Other">Other</option>
             </select>
             <button type="submit" name="add_expense">Add Expense</button>
+            <button type="submit" name="delete_all_expenses">Delete All Expenses</button>
         </form>
 
         <!-- Monthly Summary -->
@@ -46,12 +68,16 @@
 
         <!-- Expenses List -->
         <h2>Expenses</h2>
-        <ul>
+        <ul class="expense-list">
             {% for e in expenses %}
-            <li>
+            <li class="expense-item">
                 <span><strong>Name:</strong> {{ e.name }}</span>
                 <span><strong>Amount:</strong> {{ e.amount }}</span>
                 <span><strong>Category:</strong> {{ e.category }}</span>
+                <form method="POST" style="display:inline;">
+                    <input type="hidden" name="delete_expense_name" value="{{ e.name }}">
+                    <button type="submit" name="delete_expense" class="delete-expense-btn">✖</button>
+                </form>
             </li>
             {% endfor %}
         </ul>
@@ -60,7 +86,4 @@
 
     <footer>
         &copy; 2025 FP&A Dashboard
-        <p>Created by <em><a href="https://www.linkedin.com/in/neel-patil-a04652354/" target="_blank">Neel Patil</a></em> with 💖</p>
-    </footer>
-</body>
-</html>
+        <p>Created

@@ -1,50 +1,62 @@
 from flask import Flask, render_template, request, redirect, url_for
-import datetime
 
 app = Flask(__name__)
 
-# Store budget and expenses in memory
-budget = 0
-expenses = []  # each expense will be a dict like {'name':..., 'amount':..., 'category':..., 'month':...}
+# In-memory storage
+data = {
+    "budget": 0,
+    "expenses": [],
+    "month": "October"
+}
 
 @app.route("/", methods=["GET", "POST"])
-def index():
-    global budget, expenses
+def home():
+    global data
 
-    # Handle form submissions
     if request.method == "POST":
-        # If the user submitted the "Set Budget" form
-        if "set_budget" in request.form:
-            budget = float(request.form["budget"])
+        # Handle month selection
+        if "month" in request.form:
+            data["month"] = request.form["month"]
 
-        # If the user submitted the "Add Expense" form
+        # Set budget
+        elif "set_budget" in request.form:
+            data["budget"] = float(request.form["budget"])
+
+        # Add expense
         elif "add_expense" in request.form:
             name = request.form["expense_name"]
             amount = float(request.form["expense_amount"])
             category = request.form["expense_category"]
-            month = datetime.date.today().strftime("%B %Y")  # e.g. "October 2025"
+            data["expenses"].append({"name": name, "amount": amount, "category": category})
 
-            # Add expense to list
-            expenses.append({
-                "name": name,
-                "amount": amount,
-                "category": category,
-                "month": month
-            })
+        # Delete all expenses
+        elif "delete_all_expenses" in request.form:
+            data["expenses"].clear()
 
-    # Calculate summary info
-    total_spent = sum(e["amount"] for e in expenses)
-    remaining = budget - total_spent
+        # Delete one expense
+        elif "delete_expense" in request.form:
+            name_to_delete = request.form["delete_expense_name"]
+            data["expenses"] = [e for e in data["expenses"] if e["name"] != name_to_delete]
 
-    # Pass values to HTML template
+        # Delete budget
+        elif "delete_budget" in request.form:
+            data["budget"] = 0
+
+        return redirect(url_for("home"))
+
+    total_spent = sum(e["amount"] for e in data["expenses"])
+    remaining = data["budget"] - total_spent
+
     return render_template(
         "index.html",
-        budget=budget,
-        expenses=expenses,
+        budget=data["budget"],
+        expenses=data["expenses"],
         total_spent=total_spent,
-        remaining=remaining
+        remaining=remaining,
+        month=data["month"]
     )
 
-# Run app
+
 if __name__ == "__main__":
-    app.run(debug=True, use_reloader=False)
+    app.run(debug=True)
+
