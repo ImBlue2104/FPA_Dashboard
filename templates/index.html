@@ -15,7 +15,7 @@
             <label for="month">Select Month:</label>
             <select name="month" id="month">
                 {% for m in months %}
-                <option value="{{ m }}" {% if month == m %}selected{% endif %}>{{ m }}</option>
+                    <option value="{{ m }}" {% if month==m %}selected{% endif %}>{{ m }}</option>
                 {% endfor %}
             </select>
             <button type="submit" name="set_month">Set Month</button>
@@ -34,13 +34,13 @@
         <form method="POST" class="expense-form">
             <input type="text" name="expense_name" placeholder="Expense name" required>
             <input type="number" name="expense_amount" placeholder="Amount" step="0.01" required>
-            
-            <!-- Category dropdown -->
             <select name="expense_category" required>
                 <option value="" disabled selected>Select category</option>
-                {% for cat in current.keys() if cat != 'Total' %}
-                <option value="{{ cat }}">{{ cat }}</option>
-                {% endfor %}
+                <option value="Groceries">Groceries</option>
+                <option value="Entertainment">Entertainment</option>
+                <option value="Dining">Dining</option>
+                <option value="Gas">Gas</option>
+                <option value="Other">Other</option>
             </select>
             <button type="submit" name="add_expense">Add Expense</button>
             <button type="submit" name="delete_all_expenses">Delete All Expenses</button>
@@ -49,19 +49,26 @@
         <!-- Monthly Summary -->
         <h2>Summary</h2>
         <div class="summary">
-            <div class="summary-item">Budget: {{ budget or 0 }}</div>
-            <div class="summary-item">Total Spent: {{ current['Total'] or 0 }}</div>
-            <div class="summary-item">Remaining: {{ (budget or 0) - (current['Total'] or 0) }}</div>
+            <div class="summary-item">Budget: {{ budget }}</div>
+            <div class="summary-item">Total Spent: {{ total_spent }}</div>
+            <div class="summary-item">Remaining: {{ remaining }}</div>
+            {% if growth_rate is not none %}
+            <div class="summary-item">Growth Rate vs Previous Month: {{ growth_rate }}%</div>
+            {% endif %}
         </div>
 
         <!-- Expenses List -->
         <h2>Expenses</h2>
         <ul class="expense-list">
-            {% for cat, amt in current.items() if cat != 'Total' %}
+            {% for e in expenses %}
             <li class="expense-item">
-                <span><strong>Category:</strong> {{ cat }}</span>
-                <span><strong>Amount:</strong> {{ amt }}</span>
-                <span><strong>Growth:</strong> {{ growth[cat] | round(2) }}%</span>
+                <span><strong>Name:</strong> {{ e.name }}</span>
+                <span><strong>Amount:</strong> {{ e.amount }}</span>
+                <span><strong>Category:</strong> {{ e.category }}</span>
+                <form method="POST" style="display:inline;">
+                    <input type="hidden" name="delete_expense_name" value="{{ e.name }}">
+                    <button type="submit" name="delete_expense" class="delete-expense-btn">✖</button>
+                </form>
             </li>
             {% endfor %}
         </ul>
@@ -83,9 +90,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <!-- Pass category data from Flask to JS -->
-    <script id="category-labels" type="application/json">{{ current.keys() | list | tojson }}</script>
-    <script id="category-values" type="application/json">{{ current.values() | list | tojson }}</script>
-    <script id="category-growth" type="application/json">{{ growth.values() | list | tojson }}</script>
+    <script id="category-labels" type="application/json">{{ categories | tojson }}</script>
+    <script id="category-values" type="application/json">{{ amounts | tojson }}</script>
 
     <!-- Your script -->
     <script src="{{ url_for('static', filename='script.js') }}"></script>

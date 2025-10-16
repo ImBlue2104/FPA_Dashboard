@@ -1,35 +1,30 @@
-// Load charts once the page is ready
-document.addEventListener("DOMContentLoaded", function() {
-    // Get data from Flask (injected into template)
-    const categoryLabels = JSON.parse(document.getElementById("category-labels").textContent);
-    const categoryValues = JSON.parse(document.getElementById("category-values").textContent);
+const labels = JSON.parse(document.getElementById("category-labels").textContent);
+const data = JSON.parse(document.getElementById("category-values").textContent);
 
-    // Expense by Category Chart
-    const ctx = document.getElementById("expenseChart").getContext("2d");
-    new Chart(ctx, {
-        type: "pie",
-        data: {
-            labels: categoryLabels,
-            datasets: [{
-                data: categoryValues,
-                backgroundColor: [
-                    "#007bff", "#00c6ff", "#0056b3", "#3399ff", "#80d4ff", "#004080"
-                ],
-                borderWidth: 1
-            }]
-        },
-        options: {
-            plugins: {
-                legend: {
-                    position: "bottom",
-                    labels: { color: "#333", font: { size: 14 } }
-                },
-                title: {
-                    display: true,
-                    text: "Expenses by Category",
-                    font: { size: 18 }
-                }
+const ctx = document.getElementById('expenseChart').getContext('2d');
+
+new Chart(ctx, {
+    type: 'pie',
+    data: {
+        labels: labels,
+        datasets: [{
+            label: 'Expenses',
+            data: data,
+            backgroundColor: [
+                '#42a5f5',
+                '#66bb6a',
+                '#ffa726',
+                '#ef5350',
+                '#ab47bc'
+            ]
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'bottom'
             }
         }
-    });
+    }
 });

@@ -1,116 +1,105 @@
-import os
-import json
 from flask import Flask, render_template, request, redirect, url_for
+import json
+import os
 
 app = Flask(__name__)
 
-EXPENSE_FILE = "expenses.json"
+DATA_FILE = "data.json"
 
-# Ensure JSON file exists
-if not os.path.exists(EXPENSE_FILE):
-    with open(EXPENSE_FILE, "w") as f:
+# Initialize empty data file if it doesn't exist
+if not os.path.exists(DATA_FILE):
+    with open(DATA_FILE, "w") as f:
         json.dump({}, f, indent=4)
 
-CATEGORIES = ["Groceries", "Entertainment", "Dining", "Gas", "Utilities", "Other"]
-
-# Load all expenses
-def load_expenses():
-    with open(EXPENSE_FILE) as f:
+def load_data():
+    with open(DATA_FILE, "r") as f:
         return json.load(f)
 
-# Save expenses
-def save_expenses(data):
-    with open(EXPENSE_FILE, "w") as f:
+def save_data(data):
+    with open(DATA_FILE, "w") as f:
         json.dump(data, f, indent=4)
-
-# Register a new month with all categories starting at 0
-def register_month(month_name):
-    data = load_expenses()
-    if month_name not in data:
-        data[month_name] = {cat: 0 for cat in CATEGORIES}
-        data[month_name]["Total"] = 0
-        save_expenses(data)
-
-# Add or update an expense
-def add_expense(month_name, category, amount):
-    data = load_expenses()
-    if month_name not in data:
-        register_month(month_name)
-    if category not in data[month_name]:
-        data[month_name][category] = 0
-    data[month_name][category] += amount
-    # Update total
-    data[month_name]["Total"] = sum(value for key, value in data[month_name].items() if key != "Total")
-    save_expenses(data)
-
-# Delete all expenses for a month
-def delete_all_expenses(month_name):
-    data = load_expenses()
-    if month_name in data:
-        data[month_name] = {cat: 0 for cat in CATEGORIES}
-        data[month_name]["Total"] = 0
-        save_expenses(data)
-
-# Calculate percentage growth compared to previous month
-def calculate_growth(current_month, previous_month):
-    growth = {}
-    for category in current_month:
-        if category == "Total":
-            continue
-        prev = previous_month.get(category, 0)
-        curr = current_month[category]
-        growth[category] = ((curr - prev) / prev * 100) if prev else 0
-    # Total growth
-    prev_total = previous_month.get("Total", 0)
-    curr_total = current_month.get("Total", 0)
-    growth["Total"] = ((curr_total - prev_total) / prev_total * 100) if prev_total else 0
-    return growth
 
 @app.route("/", methods=["GET", "POST"])
 def home():
+    data = load_data()
+    months = ["January","February","March","April","May","June","July","August","September","October","November","December"]
+    
     # Default month
-    month = request.form.get("month") or "October"
-
-    # Register month if it doesn't exist
-    register_month(month)
-
-    # Load data
-    expenses = load_expenses()
-    current = expenses.get(month, {})
+    month = request.args.get("month", "January")
+    if month not in data:
+        data[month] = {"budget": 0, "expenses": []}
 
     # Handle form submissions
     if request.method == "POST":
+        # Month selection
+        if "set_month" in request.form:
+            month = request.form.get("month", month)
+            if month not in data:
+                data[month] = {"budget": 0, "expenses": []}
+
+        # Set budget
+        if "set_budget" in request.form:
+            budget = float(request.form.get("budget", 0))
+            data[month]["budget"] = budget
+
+        # Delete budget
+        if "delete_budget" in request.form:
+            data[month]["budget"] = 0
+
         # Add expense
         if "add_expense" in request.form:
             name = request.form.get("expense_name")
+            amount = float(request.form.get("expense_amount", 0))
             category = request.form.get("expense_category")
-            amount = float(request.form.get("expense_amount"))
-            add_expense(month, category, amount)
-            return redirect(url_for("home"))
+            data[month]["expenses"].append({
+                "name": name,
+                "amount": amount,
+                "category": category
+            })
+
+        # Delete single expense
+        if "delete_expense" in request.form:
+            name_to_delete = request.form.get("delete_expense_name")
+            data[month]["expenses"] = [e for e in data[month]["expenses"] if e["name"] != name_to_delete]
 
         # Delete all expenses
         if "delete_all_expenses" in request.form:
-            delete_all_expenses(month)
-            return redirect(url_for("home"))
+            data[month]["expenses"] = []
 
-    # Previous month for growth calculation (fallback empty)
-    months_list = list(expenses.keys())
-    months_list.sort()
-    prev_month_name = months_list[months_list.index(month)-1] if month in months_list and months_list.index(month) > 0 else None
-    previous = expenses.get(prev_month_name, {}) if prev_month_name else {}
+        save_data(data)
+        return redirect(url_for("home", month=month))
 
-    growth = calculate_growth(current, previous)
+    # Summary calculations
+    expenses = data[month]["expenses"]
+    total_spent = sum(e["amount"] for e in expenses)
+    budget = data[month]["budget"]
+    remaining = budget - total_spent
 
-    # Dummy budget (can extend with real budget handling)
-    budget = None
+    # Growth rate vs previous month
+    prev_index = months.index(month)-1
+    growth_rate = None
+    if prev_index >= 0:
+        prev_month = months[prev_index]
+        prev_total = sum(data.get(prev_month, {}).get("expenses", []), 0)
+        prev_total = sum(e["amount"] for e in data.get(prev_month, {}).get("expenses", []))
+        if prev_total > 0:
+            growth_rate = round(((total_spent - prev_total)/prev_total)*100,2)
+
+    # Data for chart
+    categories = [e["category"] for e in expenses]
+    amounts = [e["amount"] for e in expenses]
 
     return render_template(
         "index.html",
         month=month,
-        months=months_list,
-        current=current,
-        growth=growth,
-        budget=budget
+        months=months,
+        expenses=expenses,
+        total_spent=total_spent,
+        budget=budget,
+        remaining=remaining,
+        growth_rate=growth_rate,
+        categories=categories,
+        amounts=amounts
     )
 
 if __name__ == "__main__":

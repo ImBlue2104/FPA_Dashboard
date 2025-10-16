@@ -1,0 +1,36 @@
+{
+    "January": {
+        "budget": 0,
+        "expenses": []
+    },
+    "October": {
+        "budget": 2000.0,
+        "expenses": [
+            {
+                "name": "Sneakers",
+                "amount": 120.0,
+                "category": "Other"
+            },
+            {
+                "name": "JJK Execution Movie",
+                "amount": 30.0,
+                "category": "Entertainment"
+            },
+            {
+                "name": "Angry Chickz",
+                "amount": 14.0,
+                "category": "Dining"
+            },
+            {
+                "name": "W",
+                "amount": 30.0,
+                "category": "Groceries"
+            },
+            {
+                "name": "Gas Costco",
+                "amount": 40.0,
+                "category": "Gas"
+            }
+        ]
+    }
+}
